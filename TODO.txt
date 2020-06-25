@@ -10,9 +10,11 @@ Save the contents of the posts to directory of user's choice
 	Save text posts to text post folder
 	Save image posts to image post folder
 
-Calling an argument tag without second argument displays current setting
+Calling a flag without an argument displays current setting
 	i.e. python <scriptname> -save 
 		C:\\user\location
+
+Must continously check the amount of requests made per minute
 
 Optional tasks based on user settings:
 Remove posts after they've been downloaded to computer
