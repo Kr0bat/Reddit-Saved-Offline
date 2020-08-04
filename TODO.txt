@@ -1,7 +1,7 @@
 Authenticate with reddit
 (ON FIRST USE ONLY)
 	Create default config file:
-	Save posts per subreddit basis
+	Save posts in folders named after respective subreddits
 	Don't remove posts downloaded to computer
 	Retrieve posts from all saved subreddits
 	Set default save directory to the directory that the script was run in
@@ -19,12 +19,9 @@ Must continously check the amount of requests made per minute
 Optional tasks based on user settings:
 Remove posts after they've been downloaded to computer
 Choose to save images, text posts, or both
-Change save location
-	i.e. python <scriptname> -save "C:\\user\location" changes save location for files
-Choose to either save reddit posts in one big folder, or into folders for each subreddit
 Runs program with subreddit whitelist
 	i.e. python <scriptname> -sub grandorder
 
-
-
-
+Image support
+Revoke Token
+Imgur support
