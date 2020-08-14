@@ -17,10 +17,61 @@ class PostValue(Enum):
     # The two posts share a title and nothing else
     TITLE = 2
     # The two posts share a title, and were posted at the same time, in the same place, by the same author
-    EDITED = 3
+    EDIT = 3
     # The two posts are identical
     DUPLICATE = 4
+        
+def nextPage():
+    global response, count
+    if (response.json()['data']['after'] == None):
+        return 0
+    else:
+        count += 100
+        after = response.json()['data']['after']
+        response = requests.get(f'https://oauth.reddit.com/user/{user}/saved?raw_json=1&limit=100&count={count}&after={after}', headers=headers)
+        return 1
+    
+#returns ABSOLUTE Filepath of saved post
+def namePost(title, subreddit):
+    title = title.replace('/', '')
+    title = title.replace('\\', '')
+    title = title.replace(':', '')
+    title = title.replace('*', '')
+    title = title.replace('?', '')
+    title = title.replace('"', '')
+    title = title.replace('<', '')
+    title = title.replace('>', '')
+    title = title.replace('|', '')
+                
+    name = Path.cwd() / Path(subreddit) / title
+    name = os.path.dirname(name)
+    if(len(name) < 250):
+        return Path(name)
+    else:
+        name = name[:250]
+        return Path(name)
 
+def checkContent(filePath):
+    if ((filePath / ".txt").is_file()):
+        oldPost = open(filePath / ".txt", encoding='utf-8')
+        hSize = len(header.encode('utf-8'))
+        cSize = len(content.encode('utf-8'))
+        oSize = os.stat(oldPost.name).st_size
+                        
+        if (header == oldPost.read(hSize)):
+            oldPost.seek(0)
+            # content.encode() == oldPost.read().encode()
+            if (cSize == oSize):
+                oldPost.close()
+                return PostValue.DUPLICATE
+            else:
+                return PostValue.EDIT
+        else:
+            oldPost.close()
+            return PostValue.TITLE   
+    else:
+        return PostValue.UNIQUE
+    
 def savePost():
     while (True):
         for post in response.json()['data']['children']:
@@ -48,21 +99,8 @@ def savePost():
                 header = f"{title}: by {author}\n\n{time}"
                 footer = f"Permalink:{link}"
                 content = header+"\n\n\n"+selftext+"\n\n\n"+footer
-                
-                title = title.replace('/', '')
-                title = title.replace('\\', '')
-                title = title.replace(':', '')
-                title = title.replace('*', '')
-                title = title.replace('?', '')
-                title = title.replace('"', '')
-                title = title.replace('<', '')
-                title = title.replace('>', '')
-                title = title.replace('|', '')
                             
                 try:
-                    # Make this less stupid pls
-                    # Truncate the title only if the filename is near windows character limit
-                    
                     fileNum = 1
                     filePath = namePost(title, subreddit)
                     
@@ -71,25 +109,7 @@ def savePost():
                     # If the contents are the same leave the old file unedited and skip over the post
                     
                     
-                    if ((subreddit / Path(filePath.name + ".txt")).is_file()):
-                        oldPost = open(os.path.abspath(filePath) + ".txt", encoding='utf-8')
-                    
-                        
-                        hSize = len(header.encode('utf-8'))
-                        cSize = len(content.encode('utf-8'))
-                        oSize = os.stat(oldPost.name).st_size
-                        
-                        if (header == oldPost.read(hSize)):
-                            oldPost.seek(0)     
-                            if (content.encode() == oldPost.read().encode() or cSize == oSize):
-                                print("SAME FILE")
-                                continue
-                        else:
-                            while ((subreddit / Path(filePath.name + ".txt")).is_file()):
-                                filePath = Path(subreddit) / f"{title[:25]}_{fileNum}"
-                                if ((subreddit / Path(filePath.name + ".txt")).is_file()):
-                                    fileNum += 1
-                        oldPost.close()
+        
                     filePath = Path(os.path.abspath(filePath) + ".txt")
                     print(filePath)
                     
@@ -105,38 +125,6 @@ def savePost():
                     
         if(nextPage()):
             break
-        
-def nextPage():
-    global response, count
-    if (response.json()['data']['after'] == None):
-        return 0
-    else:
-        count += 100
-        after = response.json()['data']['after']
-        response = requests.get(f'https://oauth.reddit.com/user/{user}/saved?raw_json=1&limit=100&count={count}&after={after}', headers=headers)
-        return 1
-    
-#returns ABSOLUTE Filepath of saved post
-def namePost(title, subreddit):
-    name = Path.cwd() / Path(subreddit) / title
-    name = os.path.dirname(name)
-    if(len(name) < 250):
-        return Path(name)
-    else:
-        name = name[:250]
-        return Path(name)
-    
-# -1 = Different File
-# 1 = Same File
-# 2 = Same Post, different contents
-
-
-def checkContent(filePath):
-    if ((filePath / ".txt").is_file()):
-        oldPost = open(filePath / ".txt", encoding='utf-8')
-        oldPost.close()
-    else:
-        return PostValue.UNIQUE
         
 if (len(sys.argv) > 1):
     for arg in sys.argv[1:]:
