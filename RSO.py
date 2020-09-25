@@ -20,6 +20,7 @@ class PostValue(Enum):
     EDIT = 3
     # The two posts are identical
     DUPLICATE = 4
+    
         
 def nextPage():
     global response, count
@@ -99,19 +100,21 @@ def savePost():
                 header = f"{title}: by {author}\n\n{time}"
                 footer = f"Permalink:{link}"
                 content = header+"\n\n\n"+selftext+"\n\n\n"+footer
-                            
+                   
+                # This is where I save the posts
+                # Duplicate = ignore
+                # Title = rename and check again
+                # Edited = rename and check again
+                # Unique = save post to computer
                 try:
                     fileNum = 1
                     filePath = namePost(title, subreddit)
-                    
-                    # This block of code should only run if the files are proven to be a different post, otherwise the post should be ignored/overwritten
-                    # If the files have the same name, author, and time, and the filesize is different create a new file called "{title} (edit)"
-                    # If the contents are the same leave the old file unedited and skip over the post
-                    
-                    
         
                     filePath = Path(os.path.abspath(filePath) + ".txt")
                     print(filePath)
+                    
+                    #use enum.name.value
+                    
                     
 
                     file = open(filePath, 'w', encoding="utf-8")               
